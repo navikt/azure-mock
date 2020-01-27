@@ -41,7 +41,7 @@ fun Application.AzureMock() {
             val wellKnownResponse = AzureWellKnown.response(
                     issuer = call.request.issuer(),
                     tokenEndpoint = "$baseUrl${Konstanter.tokenPath}",
-                    authorizationEndpoint = "$baseUrl${Konstanter.authorizationPath}",
+                    authorizationEndpoint = "${call.request.baseUrlAuthorizationEndpoint()}${Konstanter.authorizationPath}",
                     jwksUri = "$baseUrl${Konstanter.jwksPath}"
             )
             call.respondText(
@@ -166,4 +166,5 @@ private class KtorTokenRequest(
 }
 
 private fun ApplicationRequest.baseUrl() = "${origin.scheme}://${host()}:${port()}"
+private fun ApplicationRequest.baseUrlAuthorizationEndpoint() = "${origin.scheme}://localhost:${port()}"
 private fun ApplicationRequest.issuer() = "${baseUrl()}${Konstanter.basePath}"
