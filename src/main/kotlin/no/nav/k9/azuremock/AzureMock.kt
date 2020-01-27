@@ -163,7 +163,6 @@ private class KtorTokenRequest(
     private val authorizationHeader = call.request.header(HttpHeaders.Authorization)
     override fun urlDecodedBody(): String = urlDecodedBody
     override fun authorizationHeader() = authorizationHeader
-
 }
 
 private fun ApplicationRequest.baseUrl() = "${origin.scheme}://${host()}:${port()}"
