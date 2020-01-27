@@ -1,9 +1,6 @@
 package no.nav.k9.azuremock
 
-import io.ktor.application.Application
-import io.ktor.application.ApplicationCall
-import io.ktor.application.call
-import io.ktor.application.install
+import io.ktor.application.*
 import io.ktor.features.origin
 import io.ktor.html.respondHtml
 import io.ktor.http.ContentType
@@ -21,6 +18,7 @@ import no.nav.helse.dusseldorf.testsupport.http.AzureToken
 import no.nav.helse.dusseldorf.testsupport.http.AzureWellKnown
 import no.nav.helse.dusseldorf.testsupport.http.TokenRequest
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
+import org.slf4j.LoggerFactory
 import java.net.URLDecoder
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
@@ -33,10 +31,13 @@ private object Konstanter {
     internal const val jwksPath = "$basePath/jwks"
 }
 
+private val logger = LoggerFactory.getLogger("no.nav.AzureMock")
+
 @KtorExperimentalAPI
 fun Application.AzureMock() {
     install(Routing) {
         get(Konstanter.wellKnownPath) {
+            logger.info("${call.request.httpMethod.value}@${call.request.uri}")
             val baseUrl = call.request.baseUrl()
             val wellKnownResponse = AzureWellKnown.response(
                     issuer = call.request.issuer(),
@@ -52,6 +53,7 @@ fun Application.AzureMock() {
         }
 
         get(Konstanter.jwksPath) {
+            logger.info("${call.request.httpMethod.value}@${call.request.uri}")
             call.respondText(
                     contentType = ContentType.Application.Json,
                     status = HttpStatusCode.OK,
@@ -60,6 +62,7 @@ fun Application.AzureMock() {
         }
 
         post(Konstanter.tokenPath) {
+            logger.info("${call.request.httpMethod.value}@${call.request.uri}")
             val tokenResponse = AzureToken.response(
                     request = KtorTokenRequest(
                             call = call,
@@ -75,6 +78,7 @@ fun Application.AzureMock() {
         }
 
         get(Konstanter.authorizationPath) {
+            logger.info("${call.request.httpMethod.value}@${call.request.uri}")
             val clientId = call.request.queryParameters.getOrFail("client_id")
             val redirectUri = call.request.queryParameters.getOrFail("redirect_uri")
             val scope = call.request.queryParameters.getOrFail("scope")
@@ -111,6 +115,7 @@ fun Application.AzureMock() {
         }
 
         post(Konstanter.authorizationPath) {
+            logger.info("${call.request.httpMethod.value}@${call.request.uri}")
             val parameters = call.receiveParameters()
             val userId = parameters.getOrFail("user_id")
             val name = parameters["name"] ?: userId
