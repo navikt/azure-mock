@@ -42,7 +42,7 @@ fun Application.AzureMock() {
             val wellKnownResponse = AzureWellKnown.response(
                     issuer = call.request.issuer(),
                     tokenEndpoint = "$baseUrl${Konstanter.tokenPath}",
-                    authorizationEndpoint = "${call.request.baseUrlAuthorizationEndpoint()}${Konstanter.authorizationPath}",
+                    authorizationEndpoint = call.request.authorizationEndpoint(),
                     jwksUri = "$baseUrl${Konstanter.jwksPath}"
             )
             call.respondText(
@@ -85,26 +85,33 @@ fun Application.AzureMock() {
             val state = call.request.queryParameters.getOrFail("state")
             val nonce = call.request.queryParameters.getOrFail("nonce")
 
+            // Optional
+            val sattUserId = call.request.queryParameters["user_id"]?:""
+            val sattName = call.request.queryParameters["name"]?:""
+            val autoSubmit = !sattUserId.isBlank() && !sattName.isBlank()
+
             call.respondHtml {
                 head {
                     title { +"Azure Mock Login Input" }
                 }
                 body {
+                    if (autoSubmit) { onLoad = "document.form.submit()" }
                     form(action = Konstanter.authorizationPath,
                          encType = FormEncType.applicationXWwwFormUrlEncoded,
                          method = FormMethod.post) {
+                        name = "form"
                         acceptCharset = "utf-8"
                         h1 { +"Azure Mock Login Input"}
                         p {
                             label { +"Bruker ID: " }
-                            textInput(name = "user_id")
+                            textInput(name = "user_id") { value = sattUserId }
                         }
                         p {
                             label { +"Navn: " }
-                            textInput(name = "name")
+                            textInput(name = "name") { value = sattName }
                         }
                         hiddenInput(name = "client_id") { value = clientId }
-                        hiddenInput(name = "scope") { value = scope }
+                        hiddenInput(name = "scope") {  value = scope }
                         hiddenInput(name = "state") { value = state }
                         hiddenInput(name = "nonce") { value = nonce }
                         hiddenInput(name = "redirect_uri") { value = redirectUri }
@@ -118,8 +125,7 @@ fun Application.AzureMock() {
             logger.info("${call.request.httpMethod.value}@${call.request.uri}")
             val parameters = call.receiveParameters()
             val userId = parameters.getOrFail("user_id")
-            val name = parameters["name"] ?: userId
-            val clientId = parameters.getOrFail("client_id")
+            val sattName = parameters["name"] ?: userId
             val scope = parameters.getOrFail("scope")
             val state = parameters.getOrFail("state")
             val nonce = parameters.getOrFail("nonce")
@@ -127,32 +133,21 @@ fun Application.AzureMock() {
 
             val code = AzureToken.Code(
                     userId = userId,
-                    name = name,
+                    name = sattName,
                     scopes = scope,
                     nonce = nonce
             )
 
             call.respondHtml {
-                head {
-                    title { +"Azure Mock Login Oppsummering" }
-                }
                 body {
                     form(action = redirectUri,
                          encType = FormEncType.applicationXWwwFormUrlEncoded,
                          method = FormMethod.post) {
+                        onLoad = "document.form.submit()"
                         acceptCharset = "utf-8"
-                        h1 { +"Azure Mock Login Oppsummering"}
-                        p { +"Bruker ID: $userId"}
-                        p { +"Navn: $name"}
-                        p { +"Client ID: $clientId"}
-                        p { +"Scope: $scope"}
-                        p { +"State: $state"}
-                        p { +"Nonce: $nonce"}
-                        p { +"Redirect URI: $redirectUri"}
-
+                        name = "submit"
                         hiddenInput(name = "code") { value = code.toString() }
                         hiddenInput(name = "state") { value = state }
-                        submitInput {value ="Bekreft"}
                     }
                 }
             }
@@ -173,3 +168,10 @@ private class KtorTokenRequest(
 private fun ApplicationRequest.baseUrl() = "${origin.scheme}://${host()}:${port()}"
 private fun ApplicationRequest.baseUrlAuthorizationEndpoint() = "${origin.scheme}://localhost:${port()}"
 private fun ApplicationRequest.issuer() = "${baseUrl()}${Konstanter.basePath}"
+private fun ApplicationRequest.authorizationEndpoint() : String {
+    return if (call.request.queryParameters.isEmpty()) {
+        "${call.request.baseUrlAuthorizationEndpoint()}${Konstanter.authorizationPath}"
+    } else {
+        "${call.request.baseUrlAuthorizationEndpoint()}${Konstanter.authorizationPath}?${call.request.queryString()}"
+    }
+}
