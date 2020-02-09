@@ -140,12 +140,12 @@ fun Application.AzureMock() {
 
             call.respondHtml {
                 body {
+                    onLoad = "document.form.submit()"
                     form(action = redirectUri,
                          encType = FormEncType.applicationXWwwFormUrlEncoded,
                          method = FormMethod.post) {
-                        onLoad = "document.form.submit()"
+                        name = "form"
                         acceptCharset = "utf-8"
-                        name = "submit"
                         hiddenInput(name = "code") { value = code.toString() }
                         hiddenInput(name = "state") { value = state }
                     }
