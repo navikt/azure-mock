@@ -14,6 +14,7 @@ import io.ktor.routing.post
 import io.ktor.util.KtorExperimentalAPI
 import io.ktor.util.getOrFail
 import kotlinx.html.*
+import no.nav.helse.dusseldorf.ktor.core.getOptionalString
 import no.nav.helse.dusseldorf.testsupport.http.AzureToken
 import no.nav.helse.dusseldorf.testsupport.http.AzureWellKnown
 import no.nav.helse.dusseldorf.testsupport.http.TokenRequest
@@ -35,6 +36,12 @@ private val logger = LoggerFactory.getLogger("no.nav.AzureMock")
 
 @KtorExperimentalAPI
 fun Application.AzureMock() {
+    val issuerHost = environment.config.getOptionalString("no.nav.issuer_host", false)
+    fun ApplicationRequest.issuer() = when (issuerHost) {
+        null -> baseUrl()
+        else -> baseUrl(host = issuerHost)
+    }
+
     install(Routing) {
         get(Konstanter.wellKnownPath) {
             logger.info("${call.request.httpMethod.value}@${call.request.uri}")
@@ -165,9 +172,8 @@ private class KtorTokenRequest(
     override fun authorizationHeader() = authorizationHeader
 }
 
-private fun ApplicationRequest.baseUrl() = "${origin.scheme}://${host()}:${port()}"
-private fun ApplicationRequest.baseUrlAuthorizationEndpoint() = "${origin.scheme}://localhost:${port()}"
-private fun ApplicationRequest.issuer() = "${baseUrl()}${Konstanter.basePath}"
+private fun ApplicationRequest.baseUrl(host: String = host()) = "${origin.scheme}://$host:${port()}"
+private fun ApplicationRequest.baseUrlAuthorizationEndpoint() = baseUrl(host = "localhost")
 private fun ApplicationRequest.authorizationEndpoint() : String {
     return if (call.request.queryParameters.isEmpty()) {
         "${call.request.baseUrlAuthorizationEndpoint()}${Konstanter.authorizationPath}"
