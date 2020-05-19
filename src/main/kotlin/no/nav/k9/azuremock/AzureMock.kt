@@ -40,7 +40,7 @@ fun Application.AzureMock() {
     fun ApplicationRequest.issuer() = when (issuerHost) {
         null -> baseUrl()
         else -> baseUrl(host = issuerHost)
-    }
+    }.plus(Konstanter.basePath)
 
     install(Routing) {
         get(Konstanter.wellKnownPath) {
