@@ -9,10 +9,10 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <ktor.version>1.3.2</ktor.version>
-        <dusseldorf.sha>78b57e1</dusseldorf.sha>
+        <ktor.version>1.4.1</ktor.version>
+        <dusseldorf.sha>dcb9ddd</dusseldorf.sha>
         <dusseldorf.version>${ktor.version}.${dusseldorf.sha}</dusseldorf.version>
-        <kotlin.version>1.3.72</kotlin.version>
+        <kotlin.version>1.4.10</kotlin.version>
     </properties>
 
     <dependencies>
