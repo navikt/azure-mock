@@ -1,5 +1,6 @@
 package no.nav.k9.azuremock
 
+import com.nimbusds.jwt.SignedJWT
 import io.ktor.application.*
 import io.ktor.features.origin
 import io.ktor.html.respondHtml
@@ -19,17 +20,19 @@ import no.nav.helse.dusseldorf.testsupport.http.AzureToken
 import no.nav.helse.dusseldorf.testsupport.http.AzureWellKnown
 import no.nav.helse.dusseldorf.testsupport.http.TokenRequest
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
+import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
 import java.net.URLDecoder
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
 private object Konstanter {
-    internal const val basePath = "/v2.0"
-    internal const val wellKnownPath = "$basePath/.well-known/openid-configuration"
-    internal const val tokenPath = "$basePath/token"
-    internal const val authorizationPath = "$basePath/authorize"
-    internal const val jwksPath = "$basePath/jwks"
+    const val basePath = "/v2.0"
+    const val wellKnownPath = "$basePath/.well-known/openid-configuration"
+    const val tokenPath = "$basePath/token"
+    const val authorizationPath = "$basePath/authorize"
+    const val jwksPath = "$basePath/jwks"
+    const val audienceCheckPath = "/audience-check"
 }
 
 private val logger = LoggerFactory.getLogger("no.nav.AzureMock")
@@ -158,6 +161,44 @@ fun Application.AzureMock() {
                     }
                 }
             }
+        }
+
+        get (Konstanter.audienceCheckPath) {
+            logger.info("${call.request.httpMethod.value}@${call.request.uri}")
+            val authorizationHeader = call.request.header(HttpHeaders.Authorization)
+
+            val (status, audience) = kotlin.runCatching {
+                SignedJWT
+                    .parse(authorizationHeader!!.substringAfter("Bearer "))
+                    .jwtClaimsSet.audience
+                    .also { require(it.isNotEmpty()) }
+                    .joinToString(",")
+            }.fold(
+                onSuccess = { HttpStatusCode.OK to it },
+                onFailure = {
+                    HttpStatusCode.BadRequest to when (authorizationHeader) {
+                        null -> "Mangler Authorization header"
+                        else -> "${it::class.simpleName}:${it.message}"
+                    }.also { error -> logger.warn(error) }
+                }
+            )
+
+            @Language("HTML")
+            val html = """
+                <!DOCTYPE html>
+                <html lang="en">
+                  <head>
+                    <title>Audience check</title>
+                  </head>
+                  <body>
+                    <h1>Audience check</h1>
+                    <h2>Audience:</h2>
+                    <div id="audience">${audience}</div>
+                  </body>
+                </html>
+            """.trimIndent()
+
+            call.respondText(contentType = ContentType.Text.Html, status = status) { html }
         }
     }
 }
