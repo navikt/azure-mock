@@ -9,10 +9,10 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <ktor.version>1.4.1</ktor.version>
-        <dusseldorf.sha>dcb9ddd</dusseldorf.sha>
+        <ktor.version>1.5.0</ktor.version>
+        <dusseldorf.sha>8b77f1d</dusseldorf.sha>
         <dusseldorf.version>${ktor.version}.${dusseldorf.sha}</dusseldorf.version>
-        <kotlin.version>1.4.10</kotlin.version>
+        <kotlin.version>1.4.21</kotlin.version>
     </properties>
 
     <dependencies>
@@ -39,7 +39,7 @@
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-html-jvm</artifactId>
-            <version>0.7.1</version>
+            <version>0.7.2</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
