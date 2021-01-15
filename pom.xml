@@ -10,7 +10,7 @@
 
     <properties>
         <ktor.version>1.5.0</ktor.version>
-        <dusseldorf.sha>8b77f1d</dusseldorf.sha>
+        <dusseldorf.sha>0d3bd1e</dusseldorf.sha>
         <dusseldorf.version>${ktor.version}.${dusseldorf.sha}</dusseldorf.version>
         <kotlin.version>1.4.21</kotlin.version>
     </properties>
