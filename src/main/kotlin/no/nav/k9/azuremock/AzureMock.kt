@@ -4,9 +4,7 @@ import com.nimbusds.jwt.SignedJWT
 import io.ktor.application.*
 import io.ktor.features.origin
 import io.ktor.html.respondHtml
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
+import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.respondText
 import io.ktor.routing.Routing
@@ -73,10 +71,12 @@ fun Application.AzureMock() {
 
         post(Konstanter.tokenPath) {
             logger.info("${call.request.httpMethod.value}@${call.request.uri}")
+            val body = call.receiveText()
+            logger.info(body)
             val tokenResponse = AzureToken.response(
                     request = KtorTokenRequest(
                             call = call,
-                            body = call.receiveText()
+                            body = body
                     ),
                     issuer = call.request.issuer()
             )
@@ -134,6 +134,7 @@ fun Application.AzureMock() {
         post(Konstanter.authorizationPath) {
             logger.info("${call.request.httpMethod.value}@${call.request.uri}")
             val parameters = call.receiveParameters()
+            logger.info(parameters.asString())
             val userId = parameters.getOrFail("user_id")
             val sattName = parameters["name"] ?: userId
             val scope = parameters.getOrFail("scope")
@@ -222,3 +223,4 @@ private fun ApplicationRequest.authorizationEndpoint() : String {
         "${call.request.baseUrlAuthorizationEndpoint()}${Konstanter.authorizationPath}?${call.request.queryString()}"
     }
 }
+private fun Parameters.asString() = entries().joinToString { "${it.key}=[${it.value.joinToString(",")}]" }
