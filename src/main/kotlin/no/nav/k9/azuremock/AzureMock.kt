@@ -72,7 +72,7 @@ fun Application.AzureMock() {
         post(Konstanter.tokenPath) {
             logger.info("${call.request.httpMethod.value}@${call.request.uri}")
             val body = call.receiveText()
-            logger.info(body)
+            body.parseUrlEncodedParameters().logParameters()
             val tokenResponse = AzureToken.response(
                     request = KtorTokenRequest(
                             call = call,
@@ -134,7 +134,7 @@ fun Application.AzureMock() {
         post(Konstanter.authorizationPath) {
             logger.info("${call.request.httpMethod.value}@${call.request.uri}")
             val parameters = call.receiveParameters()
-            logger.info(parameters.asString())
+            parameters.logParameters()
             val userId = parameters.getOrFail("user_id")
             val sattName = parameters["name"] ?: userId
             val scope = parameters.getOrFail("scope")
@@ -224,3 +224,4 @@ private fun ApplicationRequest.authorizationEndpoint() : String {
     }
 }
 private fun Parameters.asString() = entries().joinToString { "${it.key}=[${it.value.joinToString(",")}]" }
+private fun Parameters.logParameters() = logger.info("Parameters=[${this.asString()}]")
