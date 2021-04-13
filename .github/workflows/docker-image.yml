@@ -4,7 +4,7 @@ on:
     paths-ignore:
       - '**.md'
       - '.gitignore'
-      - 'LICENCE'
+      - 'LICENSE'
       - 'CODEOWNERS'
     branches:
       - master
@@ -20,21 +20,31 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: '11.x'
+
       - name: Bygge JAR
         run: ./mvnw clean package -DskipTests --settings ./.m2/settings.xml
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Sette Docker- navn og tag
         env:
-          DOCKER_IMAGE: docker.pkg.github.com/${{ github.repository }}/azure-mock
+          DOCKER_IMAGE: docker.pkg.github.com/${{ github.repository }}
+          DOCKER_IMAGE_GH: ghcr.io/${{ github.repository }}
         run: |
           echo "LATEST=$DOCKER_IMAGE:latest" >> $GITHUB_ENV
+          echo "LATEST_GH=$DOCKER_IMAGE_GH:latest" >> $GITHUB_ENV
+
       - name: Bygge Docker image
-        run: docker build . --pull --tag $LATEST
+        run: |
+          docker build . --pull --tag $LATEST
+          docker build . --pull --tag $LATEST_GH
+
       - name: Laste opp Docker image
         run: |
           echo "$GITHUB_TOKEN" | docker login --username "x-access-token" --password-stdin https://docker.pkg.github.com
           docker push $LATEST
+          echo "$GITHUB_TOKEN" | docker login --username ${GITHUB_REPOSITORY} --password-stdin ghcr.io
+          docker push $LATEST_GH
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
