@@ -10,7 +10,6 @@ import io.ktor.response.respondText
 import io.ktor.routing.Routing
 import io.ktor.routing.get
 import io.ktor.routing.post
-import io.ktor.util.KtorExperimentalAPI
 import io.ktor.util.getOrFail
 import kotlinx.html.*
 import no.nav.helse.dusseldorf.ktor.core.getOptionalString
@@ -35,7 +34,6 @@ private object Konstanter {
 
 private val logger = LoggerFactory.getLogger("no.nav.AzureMock")
 
-@KtorExperimentalAPI
 fun Application.AzureMock() {
     val issuerHost = environment.config.getOptionalString("no.nav.issuer_host", false)
     fun ApplicationRequest.issuer() = when (issuerHost) {
