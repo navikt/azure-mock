@@ -9,9 +9,9 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <ktor.version>1.6.7</ktor.version>
-        <dusseldorf.version>3.1.6.7-f2a96e8</dusseldorf.version>
-        <kotlin.version>1.6.10</kotlin.version>
+        <ktor.version>1.6.8</ktor.version>
+        <dusseldorf.version>3.1.6.8-1a4651d</dusseldorf.version>
+        <kotlin.version>1.6.21</kotlin.version>
     </properties>
 
     <dependencies>
@@ -33,7 +33,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.13.1</version>
+            <version>2.13.2</version>
         </dependency>
         <dependency>
             <groupId>io.ktor</groupId>
@@ -43,7 +43,7 @@
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-html-jvm</artifactId>
-            <version>0.7.3</version>
+            <version>0.7.5</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
