@@ -11,7 +11,7 @@
     <properties>
         <ktor.version>1.6.8</ktor.version>
         <dusseldorf.version>3.1.6.8-1a4651d</dusseldorf.version>
-        <kotlin.version>1.6.21</kotlin.version>
+        <kotlin.version>1.7.10</kotlin.version>
     </properties>
 
     <dependencies>
