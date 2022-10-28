@@ -1,16 +1,16 @@
 package no.nav.k9.azuremock
 
 import com.nimbusds.jwt.SignedJWT
-import io.ktor.application.*
-import io.ktor.features.origin
-import io.ktor.html.respondHtml
 import io.ktor.http.*
-import io.ktor.request.*
-import io.ktor.response.respondText
-import io.ktor.routing.Routing
-import io.ktor.routing.get
-import io.ktor.routing.post
-import io.ktor.util.getOrFail
+import io.ktor.server.application.*
+import io.ktor.server.html.respondHtml
+import io.ktor.server.plugins.origin
+import io.ktor.server.request.*
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.Routing
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.util.*
 import kotlinx.html.*
 import no.nav.helse.dusseldorf.ktor.core.getOptionalString
 import no.nav.helse.dusseldorf.testsupport.http.AzureToken
@@ -46,24 +46,24 @@ fun Application.AzureMock() {
             logger.info("${call.request.httpMethod.value}@${call.request.uri}")
             val baseUrl = call.request.baseUrl()
             val wellKnownResponse = AzureWellKnown.response(
-                    issuer = call.request.issuer(),
-                    tokenEndpoint = "$baseUrl${Konstanter.tokenPath}",
-                    authorizationEndpoint = call.request.authorizationEndpoint(),
-                    jwksUri = "$baseUrl${Konstanter.jwksPath}"
+                issuer = call.request.issuer(),
+                tokenEndpoint = "$baseUrl${Konstanter.tokenPath}",
+                authorizationEndpoint = call.request.authorizationEndpoint(),
+                jwksUri = "$baseUrl${Konstanter.jwksPath}"
             )
             call.respondText(
-                    contentType = ContentType.Application.Json,
-                    status = HttpStatusCode.OK,
-                    text = wellKnownResponse
+                contentType = ContentType.Application.Json,
+                status = HttpStatusCode.OK,
+                text = wellKnownResponse
             )
         }
 
         get(Konstanter.jwksPath) {
             logger.info("${call.request.httpMethod.value}@${call.request.uri}")
             call.respondText(
-                    contentType = ContentType.Application.Json,
-                    status = HttpStatusCode.OK,
-                    text = Azure.V2_0.getPublicJwk()
+                contentType = ContentType.Application.Json,
+                status = HttpStatusCode.OK,
+                text = Azure.V2_0.getPublicJwk()
             )
         }
 
@@ -72,16 +72,16 @@ fun Application.AzureMock() {
             val body = call.receiveText()
             body.parseUrlEncodedParameters().logParameters()
             val tokenResponse = AzureToken.response(
-                    request = KtorTokenRequest(
-                            call = call,
-                            body = body
-                    ),
-                    issuer = call.request.issuer()
+                request = KtorTokenRequest(
+                    call = call,
+                    body = body
+                ),
+                issuer = call.request.issuer()
             )
             call.respondText(
-                    contentType = ContentType.Application.Json,
-                    status = HttpStatusCode.OK,
-                    text = tokenResponse
+                contentType = ContentType.Application.Json,
+                status = HttpStatusCode.OK,
+                text = tokenResponse
             )
         }
 
@@ -94,8 +94,8 @@ fun Application.AzureMock() {
             val nonce = call.request.queryParameters.getOrFail("nonce")
 
             // Optional
-            val sattUserId = call.request.queryParameters["user_id"]?:""
-            val sattName = call.request.queryParameters["name"]?:""
+            val sattUserId = call.request.queryParameters["user_id"] ?: ""
+            val sattName = call.request.queryParameters["name"] ?: ""
             val autoSubmit = !sattUserId.isBlank() && !sattName.isBlank()
 
             call.respondHtml {
@@ -103,13 +103,17 @@ fun Application.AzureMock() {
                     title { +"Azure Mock Login Input" }
                 }
                 body {
-                    if (autoSubmit) { onLoad = "document.form.submit()" }
-                    form(action = Konstanter.authorizationPath,
-                         encType = FormEncType.applicationXWwwFormUrlEncoded,
-                         method = FormMethod.post) {
+                    if (autoSubmit) {
+                        onLoad = "document.form.submit()"
+                    }
+                    form(
+                        action = Konstanter.authorizationPath,
+                        encType = FormEncType.applicationXWwwFormUrlEncoded,
+                        method = FormMethod.post
+                    ) {
                         name = "form"
                         acceptCharset = "utf-8"
-                        h1 { +"Azure Mock Login Input"}
+                        h1 { +"Azure Mock Login Input" }
                         p {
                             label { +"Bruker ID: " }
                             textInput(name = "user_id") { value = sattUserId }
@@ -119,11 +123,11 @@ fun Application.AzureMock() {
                             textInput(name = "name") { value = sattName }
                         }
                         hiddenInput(name = "client_id") { value = clientId }
-                        hiddenInput(name = "scope") {  value = scope }
+                        hiddenInput(name = "scope") { value = scope }
                         hiddenInput(name = "state") { value = state }
                         hiddenInput(name = "nonce") { value = nonce }
                         hiddenInput(name = "redirect_uri") { value = redirectUri }
-                        submitInput{ value = "Fortsett"}
+                        submitInput { value = "Fortsett" }
                     }
                 }
             }
@@ -141,18 +145,20 @@ fun Application.AzureMock() {
             val redirectUri = parameters.getOrFail("redirect_uri")
 
             val code = AzureToken.Code(
-                    userId = userId,
-                    name = sattName,
-                    scopes = scope,
-                    nonce = nonce
+                userId = userId,
+                name = sattName,
+                scopes = scope,
+                nonce = nonce
             )
 
             call.respondHtml {
                 body {
                     onLoad = "document.form.submit()"
-                    form(action = redirectUri,
-                         encType = FormEncType.applicationXWwwFormUrlEncoded,
-                         method = FormMethod.post) {
+                    form(
+                        action = redirectUri,
+                        encType = FormEncType.applicationXWwwFormUrlEncoded,
+                        method = FormMethod.post
+                    ) {
                         name = "form"
                         acceptCharset = "utf-8"
                         hiddenInput(name = "code") { value = code.toString() }
@@ -162,7 +168,7 @@ fun Application.AzureMock() {
             }
         }
 
-        get (Konstanter.audienceCheckPath) {
+        get(Konstanter.audienceCheckPath) {
             logger.info("${call.request.httpMethod.value}@${call.request.uri}")
             val authorizationHeader = call.request.header(HttpHeaders.Authorization)
 
@@ -192,7 +198,7 @@ fun Application.AzureMock() {
                   <body>
                     <h1>Audience check</h1>
                     <h2>Audience:</h2>
-                    <div id="audience">${audience}</div>
+                    <div id="audience">$audience</div>
                   </body>
                 </html>
             """.trimIndent()
@@ -203,10 +209,10 @@ fun Application.AzureMock() {
 }
 
 private class KtorTokenRequest(
-        call: ApplicationCall,
-        body: String
-): TokenRequest {
-    private val urlDecodedBody = URLDecoder.decode(body, Charsets.UTF_8)
+    call: ApplicationCall,
+    body: String
+) : TokenRequest {
+    private val urlDecodedBody = URLDecoder.decode(body, Charsets.UTF_8.toString())
     private val authorizationHeader = call.request.header(HttpHeaders.Authorization)
     override fun urlDecodedBody(): String = urlDecodedBody
     override fun authorizationHeader() = authorizationHeader
@@ -214,12 +220,13 @@ private class KtorTokenRequest(
 
 private fun ApplicationRequest.baseUrl(host: String = host()) = "${origin.scheme}://$host:${port()}"
 private fun ApplicationRequest.baseUrlAuthorizationEndpoint() = baseUrl(host = "localhost")
-private fun ApplicationRequest.authorizationEndpoint() : String {
+private fun ApplicationRequest.authorizationEndpoint(): String {
     return if (call.request.queryParameters.isEmpty()) {
         "${call.request.baseUrlAuthorizationEndpoint()}${Konstanter.authorizationPath}"
     } else {
         "${call.request.baseUrlAuthorizationEndpoint()}${Konstanter.authorizationPath}?${call.request.queryString()}"
     }
 }
+
 private fun Parameters.asString() = entries().joinToString { "${it.key}=[${it.value.joinToString(",")}]" }
 private fun Parameters.logParameters() = logger.info("Parameters=[${this.asString()}]")
