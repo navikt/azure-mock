@@ -1,12 +1,25 @@
 version: 2
 updates:
-  - package-ecosystem: maven
+  - package-ecosystem: "maven"
     directory: "/"
     schedule:
-      interval: daily
-    open-pull-requests-limit: 15
+      interval: "weekly"
+    groups:
+      dusseldorf-ktor-deps:
+        patterns:
+          - "*dusseldorf*"
+          - "*ktor*"
+      annet-deps:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "*dusseldorf*"
+          - "*ktor*"
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
       interval: daily
-    open-pull-requests-limit: 10
+    groups:
+      github:
+        patterns:
+        - "*"
