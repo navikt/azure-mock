@@ -11,9 +11,9 @@
     <properties>
         <ktor.version>2.3.11</ktor.version>
         <dusseldorf.version>3.2.2.1-4942135</dusseldorf.version>
-        <kotlin.version>2.0.0</kotlin.version>
-        <jackson.version>2.17.1</jackson.version>
-        <kotlinx.version>0.11.0</kotlinx.version>
+        <kotlin.version>2.1.10</kotlin.version>
+        <jackson.version>2.18.3</jackson.version>
+        <kotlinx.version>0.12.0</kotlinx.version>
     </properties>
 
     <dependencies>
