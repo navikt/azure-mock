@@ -9,7 +9,7 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <ktor.version>2.3.11</ktor.version>
+        <ktor.version>3.1.2</ktor.version>
         <dusseldorf.version>3.2.2.1-4942135</dusseldorf.version>
         <kotlin.version>2.1.10</kotlin.version>
         <jackson.version>2.18.3</jackson.version>
