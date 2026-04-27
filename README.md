@@ -12,4 +12,4 @@ Pek din klients discovery url til host + port `/.well-known/openid-configuration
 ## OIDC Authorization flow uten interaksjon
 - Default vil man bli spurt om Bruker ID og navn i en form. Om man ønsker å omgå manuelt steg under innloggingen kan disse to settes som query-paramter på discovery urlen.
 
-Eks; `/.well-known/openid-configuration?name=Gizmo%20The%20Cat&user_id=22046474256`
+Eks; `/.well-known/openid-configuration?name=Gizmo%20The%20Cat&user_id=17420373147`
