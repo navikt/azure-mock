@@ -1,4 +1,4 @@
-FROM ghcr.io/navikt/sif-baseimages/java-25:2025.11.25.1015Z
+FROM ghcr.io/navikt/sif-baseimages/java-25:2026.05.11.0700Z
 LABEL org.opencontainers.image.source=https://github.com/navikt/azure-mock
 
 COPY target/app.jar ./
